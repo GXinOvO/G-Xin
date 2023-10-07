@@ -1,0 +1,3 @@
+/home/bury/project/Soldier_raid/build/CMakeFiles/rebuild_cache.dir
+/home/bury/project/Soldier_raid/build/CMakeFiles/edit_cache.dir
+/home/bury/project/Soldier_raid/build/CMakeFiles/main_cmake.dir

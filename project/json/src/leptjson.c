@@ -173,6 +173,34 @@ static int lept_parse_value(lept_context *c, lept_value *v)
 #endif
 }
 
+/*
+    遇到\u转义时，调用lept_parse_hex4()解析4未十六进制数字，存储为码点u。
+    这个函数在成功时返回解析后的文本指针，失败返回NULL。如果失败，就返回LEPT_PARSE_INCALID_UNICODE_HEX错误
+    最后，把码点编码成UTF-8，写进缓冲区。
+*/ 
+static const char *lept_parse_hex4(const char *p, unsigned *u)
+{
+    int i;
+    *u = 0;
+    for (i = 0; i < 4; i++)
+    {
+        char ch = *p++;
+        *u <<= 4;
+        if (ch >= '0' && ch <= '9') *u |= ch - '0';
+        else if (ch >= 'A' && ch <= 'F') *u |= ch - ('A' - 10);
+        else if (ch >= 'a' && ch <= 'f') *u |= ch - ('a' - 10);
+        else return NULL;
+    }
+    return p;
+}
+
+static void lept_encode_utf8(lept_context* c, unsigned u)
+{
+
+}
+
+#define STRING_ERROR(ret) do { c->top = head; return ret; } while(0)
+
 // 这里应该是JSON-text = ws value ws
 int lept_parse(lept_value *v, const char *json)
 {
@@ -331,6 +359,11 @@ static int lept_parse_string(lept_context *c, lept_value *v)
                         break;
                     case 't' :
                         PUTC(c, 't');
+                        break;
+                    case 'u' :
+                        if (!(p = lept_parse_hex4(p, &u)))
+                            STRING_ERROR(LEPT_PARSE_INVALID_UNICODE_HEX);
+                        lept_encode_utf8(c, u);
                         break;
                     default :
                         c->top = head;

@@ -102,3 +102,12 @@
   但4位的16进制数字只能表示0至0xFFFF，但之前我们说的码点是从0至0x10FFFF,那怎么能表示多出来的码点？
   其实, U+0000至0xFFFF这组Unicode字符称为基本多这种平面，还有另外16个平面。那么BMP之外的字符，JSON会使用代理对(surrogate pair)表示\uXXXX \uYYYY。在BMP中, 保留了2048个代理码点。如果第一个码点是U+D800至U+DBFF，我们便知道他的代码对的高代理项(high surrogate)，之后应该伴随一个U+DC00至U+DFFF的低代理项(low surrogate)。然后，我们用下列公式把代理对(H,L)变成成真实的码点:
   codepoint = 0x10000 + (H - 0xD800) x 0x400 + (L - 0xDC00)
+  举个例子，高音谱号?->U+1D11E不是BMP之内的字符。在JSON中可写成转义序列\uD834\uDD1E，解析第一个\uD834得到码点U+D834，我们发现他是U+D800至U+DBFF内的码点，所以他是高代理项。然后解析下一个转义序列\uDD1E得到码点U+DD1E，他在U+DC00至U+DFFF之内，是合法的的低代理项。我们计算其码点:
+  H = 0xDB34, L = 0xDD1E
+  codepoint = 0x10000 + (H - 0xD800) x 0x400 + (L - 0xDC00)
+            = 0x10000 + (0xD834 - 0xD800) x 0x400 + (0xDD1E - 0xDC00)
+            = 0x10000 + 0x34 x 0x400 + 0x11E
+            = 0x10000 + 0xD00 + 0x11E
+            = 0x1D11E
+
+          

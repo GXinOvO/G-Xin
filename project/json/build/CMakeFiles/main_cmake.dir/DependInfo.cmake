@@ -4,8 +4,8 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_C
-  "/home/bury/project/json/main.c" "/home/bury/project/json/build/CMakeFiles/main_cmake.dir/main.c.o"
-  "/home/bury/project/json/src/leptjson.c" "/home/bury/project/json/build/CMakeFiles/main_cmake.dir/src/leptjson.c.o"
+  "/home/bury/JacarandaMimosifolia/project/json/main.c" "/home/bury/JacarandaMimosifolia/project/json/build/CMakeFiles/main_cmake.dir/main.c.o"
+  "/home/bury/JacarandaMimosifolia/project/json/src/leptjson.c" "/home/bury/JacarandaMimosifolia/project/json/build/CMakeFiles/main_cmake.dir/src/leptjson.c.o"
   )
 set(CMAKE_C_COMPILER_ID "GNU")
 

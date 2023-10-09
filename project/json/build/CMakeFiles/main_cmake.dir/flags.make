@@ -6,5 +6,5 @@ C_FLAGS =
 
 C_DEFINES = 
 
-C_INCLUDES = -I/home/bury/project/json/include 
+C_INCLUDES = -I/home/bury/JacarandaMimosifolia/project/json/include 
 

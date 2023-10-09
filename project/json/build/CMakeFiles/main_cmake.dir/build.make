@@ -43,10 +43,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/bury/project/json
+CMAKE_SOURCE_DIR = /home/bury/JacarandaMimosifolia/project/json
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/bury/project/json/build
+CMAKE_BINARY_DIR = /home/bury/JacarandaMimosifolia/project/json/build
 
 # Include any dependencies generated for this target.
 include CMakeFiles/main_cmake.dir/depend.make
@@ -59,29 +59,29 @@ include CMakeFiles/main_cmake.dir/flags.make
 
 CMakeFiles/main_cmake.dir/main.c.o: CMakeFiles/main_cmake.dir/flags.make
 CMakeFiles/main_cmake.dir/main.c.o: ../main.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/bury/project/json/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/main_cmake.dir/main.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/main_cmake.dir/main.c.o   -c /home/bury/project/json/main.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/bury/JacarandaMimosifolia/project/json/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/main_cmake.dir/main.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/main_cmake.dir/main.c.o   -c /home/bury/JacarandaMimosifolia/project/json/main.c
 
 CMakeFiles/main_cmake.dir/main.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/main_cmake.dir/main.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/bury/project/json/main.c > CMakeFiles/main_cmake.dir/main.c.i
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/bury/JacarandaMimosifolia/project/json/main.c > CMakeFiles/main_cmake.dir/main.c.i
 
 CMakeFiles/main_cmake.dir/main.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/main_cmake.dir/main.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/bury/project/json/main.c -o CMakeFiles/main_cmake.dir/main.c.s
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/bury/JacarandaMimosifolia/project/json/main.c -o CMakeFiles/main_cmake.dir/main.c.s
 
 CMakeFiles/main_cmake.dir/src/leptjson.c.o: CMakeFiles/main_cmake.dir/flags.make
 CMakeFiles/main_cmake.dir/src/leptjson.c.o: ../src/leptjson.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/bury/project/json/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/main_cmake.dir/src/leptjson.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/main_cmake.dir/src/leptjson.c.o   -c /home/bury/project/json/src/leptjson.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/bury/JacarandaMimosifolia/project/json/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/main_cmake.dir/src/leptjson.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/main_cmake.dir/src/leptjson.c.o   -c /home/bury/JacarandaMimosifolia/project/json/src/leptjson.c
 
 CMakeFiles/main_cmake.dir/src/leptjson.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/main_cmake.dir/src/leptjson.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/bury/project/json/src/leptjson.c > CMakeFiles/main_cmake.dir/src/leptjson.c.i
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/bury/JacarandaMimosifolia/project/json/src/leptjson.c > CMakeFiles/main_cmake.dir/src/leptjson.c.i
 
 CMakeFiles/main_cmake.dir/src/leptjson.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/main_cmake.dir/src/leptjson.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/bury/project/json/src/leptjson.c -o CMakeFiles/main_cmake.dir/src/leptjson.c.s
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/bury/JacarandaMimosifolia/project/json/src/leptjson.c -o CMakeFiles/main_cmake.dir/src/leptjson.c.s
 
 # Object files for target main_cmake
 main_cmake_OBJECTS = \
@@ -95,7 +95,7 @@ main_cmake: CMakeFiles/main_cmake.dir/main.c.o
 main_cmake: CMakeFiles/main_cmake.dir/src/leptjson.c.o
 main_cmake: CMakeFiles/main_cmake.dir/build.make
 main_cmake: CMakeFiles/main_cmake.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/bury/project/json/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking C executable main_cmake"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/bury/JacarandaMimosifolia/project/json/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking C executable main_cmake"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/main_cmake.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -108,6 +108,6 @@ CMakeFiles/main_cmake.dir/clean:
 .PHONY : CMakeFiles/main_cmake.dir/clean
 
 CMakeFiles/main_cmake.dir/depend:
-	cd /home/bury/project/json/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/bury/project/json /home/bury/project/json /home/bury/project/json/build /home/bury/project/json/build /home/bury/project/json/build/CMakeFiles/main_cmake.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/bury/JacarandaMimosifolia/project/json/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/bury/JacarandaMimosifolia/project/json /home/bury/JacarandaMimosifolia/project/json /home/bury/JacarandaMimosifolia/project/json/build /home/bury/JacarandaMimosifolia/project/json/build /home/bury/JacarandaMimosifolia/project/json/build/CMakeFiles/main_cmake.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/main_cmake.dir/depend
 

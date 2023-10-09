@@ -10,9 +10,9 @@
 stddef.h
 -
 
-/home/bury/project/json/src/leptjson.c
+/home/bury/JacarandaMimosifolia/project/json/src/leptjson.c
 leptjson.h
-/home/bury/project/json/src/leptjson.h
+/home/bury/JacarandaMimosifolia/project/json/src/leptjson.h
 assert.h
 -
 errno.h

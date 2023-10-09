@@ -25,7 +25,24 @@ typedef struct {
     size_t size, top;   // 堆栈容量、栈顶位置.
 } lept_context;
 
-
+static void* lept_context_push(lept_context *c, size_t size)
+{
+    void *ret;
+    assert(size > 0);
+    if (c->top + size >= c->size)
+    {
+        if (c->size == 0)
+            c->size = LEPT_PARSE_STACK_INIT_SIZE;
+        while (c->top + size >= c->size)
+        {
+            c->size += c->size >> 1; // c->size * 1.5
+        }
+        c->stack = (char *)realloc(c->stack, c->size);
+    }
+    ret = c->stack + c->top;
+    c->top += size;
+    return ret;
+}
 
 static void lept_parse_whitespace(lept_context *c)
 {
@@ -194,9 +211,37 @@ static const char *lept_parse_hex4(const char *p, unsigned *u)
     return p;
 }
 
+// 根据UTF-8编码表可以实现:
+/*
+    这里最终也是要写进一个char，为什么要做x & 0xFF这种操作呢？这是因为u是unsigned类型，一些编译器可能会
+  警告这个转型可能会截断数据。但实际上，配合了范围的检测然后右移之后，可以保证写入的是0～255内的值。为了避免
+  一些编译器的警告误判，我们加上x & 0xFF。一般来说，编译器在优化之后，这与操作是会被消去的，不会影响性能。
+*/
 static void lept_encode_utf8(lept_context* c, unsigned u)
 {
-
+    if (u <= 0x7F)
+    {
+        PUTC(c, u & 0xFF);
+    }
+    else if (u <= 0x7FFF)
+    {
+        PUTC(c, 0xC0 | (u & 0xFF));
+        PUTC(c, 0x80 | (u & 0x3F));
+    }
+    else if (u <= 0xFFFF)
+    {
+        PUTC(c, 0xE0 | ((u >> 12) & 0xFF));
+        PUTC(c, 0x80 | ((u >>  6) & 0x3F));
+        PUTC(c, 0x80 | ( u        & 0x3F));
+    }
+    else
+    {
+        assert(u <= 0x10FFFF);
+        PUTC(c, 0xF0 | ((u >> 18) & 0xFF));
+        PUTC(c, 0x80 | ((u >> 12) & 0x3F));
+        PUTC(c, 0x80 | ((u >>  6) & 0x3F));
+        PUTC(c, 0x80 | ( u        & 0x3F));
+    }
 }
 
 #define STRING_ERROR(ret) do { c->top = head; return ret; } while(0)
@@ -291,24 +336,6 @@ size_t lept_get_string_length(const lept_value *v)
     return v->u.s.len;
 }
 
-static void* lept_context_push(lept_context *c, size_t size)
-{
-    void *ret;
-    assert(size > 0);
-    if (c->top + size >= c->size)
-    {
-        if (c->size == 0)
-            c->size = LEPT_PARSE_STACK_INIT_SIZE;
-        while (c->top + size >= c->size)
-        {
-            c->size += c->size >> 1; // c->size * 1.5
-        }
-        c->stack = (char *)realloc(c->stack, c->size);
-    }
-    ret = c->stack + c->top;
-    c->top += size;
-    return ret;
-}
 
 static void* lept_context_pop(lept_context *c, size_t size)
 {
@@ -319,6 +346,7 @@ static void* lept_context_pop(lept_context *c, size_t size)
 static int lept_parse_string(lept_context *c, lept_value *v)
 {
     size_t head = c->top, len;
+    unsigned u, u2;
     const char *p;
     EXPECT(c, '\"');
     p = c->json;
@@ -352,7 +380,7 @@ static int lept_parse_string(lept_context *c, lept_value *v)
                         PUTC(c, 'f');
                         break;
                     case 'n' :
-                        PUTC(c. 'n');
+                        PUTC(c, 'n');
                         break;
                     case 'r' :
                         PUTC(c, 'r');
@@ -360,9 +388,22 @@ static int lept_parse_string(lept_context *c, lept_value *v)
                     case 't' :
                         PUTC(c, 't');
                         break;
+                    //遇到高代理项，就需要把低代理项\uxxxx也解析进来
                     case 'u' :
                         if (!(p = lept_parse_hex4(p, &u)))
                             STRING_ERROR(LEPT_PARSE_INVALID_UNICODE_HEX);
+                        if (u >= 0xD800 && u <= 0xDBFF)
+                        {
+                            if (*p++ != '\\')
+                                STRING_ERROR(LEPT_PARSE_INVALID_UNICODE_SURROGATE);
+                            if (*p++ != 'u')
+                                STRING_ERROR(LEPT_PARSE_INVALID_UNICODE_SURROGATE);
+                            if (!(p = lept_parse_hex4(p, &u2)))
+                                STRING_ERROR(LEPT_PARSE_INVALID_UNICODE_HEX);
+                            if (u2 < 0xDC00 || u2 > 0xDFFF)
+                                STRING_ERROR(LEPT_PARSE_INVALID_UNICODE_SURROGATE);
+                            u = (((u - 0xD800) << 10) | (u2 - 0xDC00)) + 0x10000;
+                        }
                         lept_encode_utf8(c, u);
                         break;
                     default :

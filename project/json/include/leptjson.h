@@ -20,13 +20,20 @@ typedef enum
     这样的话，我们需要把之前的v->n改成v->u.n。而要访问字符串的数据，则要使用v->u.s.s和v->u.s.len。
     但其实C11新增来匿名struct/union语法, 就可以采用v->n、v->s、v->len来作访问。
 */
-typedef struct {
+// 由于lept_value内使用了自身类型的指针，我们必须前向声明(forward declare)此类型
+typedef struct lept_value lept_value;
+struct lept_value {
 #if 0
     char *s;
     size_t len;
     double n;
 #else
     union {
+        // 存储JSON
+        struct {
+            lept_value *e;
+            size_t size;
+        } a;
         struct { 
             char *s;
             size_t len;
@@ -35,7 +42,7 @@ typedef struct {
     } u;
 #endif
     lept_type type;
-} lept_value;
+};
 
 enum 
 {

@@ -10,17 +10,13 @@
 stddef.h
 -
 
-/home/bury/JacarandaMimosifolia/project/json/src/leptjson.c
-leptjson.h
-/home/bury/JacarandaMimosifolia/project/json/src/leptjson.h
-assert.h
--
-errno.h
--
-math.h
+/home/bury/JacarandaMimosifolia/project/json/main.c
+stdio.h
 -
 stdlib.h
 -
 string.h
 -
+leptjson.h
+/home/bury/JacarandaMimosifolia/project/json/leptjson.h
 

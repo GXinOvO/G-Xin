@@ -156,6 +156,60 @@ static int lept_parse_number(lept_context *c, lept_value *v)
 #endif
 }
 
+// 前项声明
+static int lept_parse_value(lept_context *c, lept_value *v);
+
+
+/*
+    就是在循环中建立一个临时值(lepy_value e),然后调用lept_parse_value()去把元素解析至
+  这个临时值,完成后把临时值压栈。当遇到]，把栈内的元素弹出，分配内存，生成数组值。
+    注意到，lept_parse_value()会调用lept_parse_array()，而lept_parse_array()又会调用
+  lept_parse_value()，这是互相引用，所以必须要加入函数前项声明
+*/
+static int lept_parse_array(lept_context *c, lept_value *v)
+{
+    size_t size = 0;
+    int ret;
+    EXPECT(c, '[');
+    if (*c->json == ']')
+    {
+        c->json++;
+        v->type = LEPT_ARRAY;
+        v->u.a.size = 0;
+        v->u.a.e = NULL;
+        return LEPT_PARSE_OK;
+    }
+
+    for (;;)
+    {
+        lept_value e;
+        lept_init(&e);
+        if ((ret = lept_parse_value(c, &e)) != LEPT_PARSE_OK)
+        {
+            return ret;
+        }
+        memcpy(lept_context_push(c, sizeof(lept_value)), &e, sizeof(lept_value));
+        size++;
+        if (*c->json == ',')
+        {
+            c->json++;
+        }
+        else if (*c->json == ']')
+        {
+            c->json++;
+            v->type = LEPT_ARRAY;
+            v->u.a.size = size;
+            size *= sizeof(lept_value);
+            memcpy(v->u.a.e = (lept_value*)malloc(size), lept_context_pop(c, size), size);
+            return LEPT_PARSE_OK;
+        }
+        else
+        {
+            return LEPT_PARSE_MISS_COMMA_OR_SQUARE_BRACKET;
+        }
+    }
+}
+
 // value = null / false // true
 static int lept_parse_value(lept_context *c, lept_value *v)
 {
@@ -184,6 +238,8 @@ static int lept_parse_value(lept_context *c, lept_value *v)
             return lept_parse_literal(c, v, "null", LEPT_NULL);
         case '\0':
             return LEPT_PARSE_EXPECT_VALUE;
+        case '[':
+            return lept_parse_array(c, v);
         default:
             return lept_parse_number(c, v);
     }
@@ -328,6 +384,19 @@ void lept_set_string(lept_value *v, const char *s, size_t len)
     v->u.s.s[len] = '\0';
     v->u.s.len = len;
     v->type = LEPT_STRING;
+}
+
+size_t lept_get_array_size(const lept_value *v)
+{
+    assert(v != NULL && v->type == LEPT_ARRAY);
+    return v->u.a.size;
+}
+
+lept_value* lept_get_array_element(const lept_value *v, size_t index)
+{
+    assert(v != NULL && v->type == LEPT_ARRAY);
+    assert(index < v->u.a.size);
+    return &v->u.a.e[index];
 }
 
 size_t lept_get_string_length(const lept_value *v)

@@ -140,16 +140,6 @@ static void test_parse_number_too_big()
 
 static void test_parse_array()
 {
-    lept_value v;
-    lept_init(&v);
-    EXPECT_EQ_INT(LEPT_PARSE_OK, lept_parse(&v, "[ ]"));
-    EXPECT_EQ_INT(LEPT_ARRAY, lept_get_type(&v));
-    EXPECT_EQ_SIZE_T(0, lept_get_array_size(&v));
-    lept_free(&v);
-}
-
-static void test_parse_null()
-{
     size_t i, j;
     lept_value v;
     lept_init(&v);
@@ -166,8 +156,14 @@ static void test_parse_null()
     lept_free(&v);
 
     lept_init(&v);
-    
+}
 
+static void test_parse_null()
+{
+    lept_value v;
+    v.type = LEPT_TRUE;
+    EXPECT_EQ_INT(LEPT_PARSE_OK, lept_parse(&v, "null"));
+    EXPECT_EQ_INT(LEPT_NULL, lept_get_type(&v));
 }
 
 static void test_parse_true()
@@ -287,6 +283,7 @@ static void test_parse_string() {
     TEST_STRING("\xF0\x9D\x84\x9E", "\"\\uD834\\uDD1E\"");  /* G clef sign U+1D11E */
     TEST_STRING("\xF0\x9D\x84\x9E", "\"\\ud834\\udd1e\"");  /* G clef sign U+1D11E */
 }
+
 
 static void test_parse()
 {

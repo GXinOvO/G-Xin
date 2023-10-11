@@ -156,6 +156,20 @@ static void test_parse_array()
     lept_free(&v);
 
     lept_init(&v);
+    EXPECT_EQ_INT(LEPT_PARSE_OK, lept_parse(&v, "[ [ ] , [ 0 ] , [ 0 , 1 ] , [ 0 , 1 , 2 ] ]"));
+    EXPECT_EQ_INT(LEPT_ARRAY, lept_get_type(&v));
+    EXPECT_EQ_SIZE_T(4, lept_get_array_size(&v));
+    for (i = 0; i < 4; i++) {
+        lept_value* a = lept_get_array_element(&v, i);
+        EXPECT_EQ_INT(LEPT_ARRAY, lept_get_type(a));
+        EXPECT_EQ_SIZE_T(i, lept_get_array_size(a));
+        for (j = 0; j < i; j++) {
+            lept_value* e = lept_get_array_element(a, j);
+            EXPECT_EQ_INT(LEPT_NUMBER, lept_get_type(e));
+            EXPECT_EQ_DOUBLE((double)j, lept_get_number(e));
+        }
+    }
+    lept_free(&v);
 }
 
 static void test_parse_null()

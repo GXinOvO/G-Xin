@@ -55,7 +55,8 @@ enum
     LEPT_PARSE_INVALID_STRING_ESCAPE,
     LEPT_PARSE_INVALID_STRING_CHAR,
     LEPT_PARSE_INVALID_UNICODE_HEX,
-    LEPT_PARSE_INVALID_UNICODE_SURROGATE
+    LEPT_PARSE_INVALID_UNICODE_SURROGATE,
+    LEPT_PARSE_MISS_COMMA_OR_SQUARE_BRACKET
 };
 
 // 解析JSON
@@ -86,5 +87,8 @@ void lept_set_number(lept_value *v, double n);
 const char* lept_get_string(const lept_value *v);
 
 size_t lept_get_string_length(const lept_value *v);
+
+size_t lept_get_array_size(const lept_value *v);
+lept_value *lept_get_array_element(const lept_value *v, size_t index);
 
 #endif

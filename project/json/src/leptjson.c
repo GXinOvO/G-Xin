@@ -156,6 +156,12 @@ static int lept_parse_number(lept_context *c, lept_value *v)
 #endif
 }
 
+static void* lept_context_pop(lept_context *c, size_t size)
+{
+    assert(c->top >= size);
+    return c->stack + (c->top -= size);
+}
+
 // 前项声明
 static int lept_parse_value(lept_context *c, lept_value *v);
 
@@ -171,6 +177,7 @@ static int lept_parse_array(lept_context *c, lept_value *v)
     size_t size = 0;
     int ret;
     EXPECT(c, '[');
+    lept_parse_whitespace(c);
     if (*c->json == ']')
     {
         c->json++;
@@ -186,13 +193,18 @@ static int lept_parse_array(lept_context *c, lept_value *v)
         lept_init(&e);
         if ((ret = lept_parse_value(c, &e)) != LEPT_PARSE_OK)
         {
-            return ret;
+            // 原本是直接返回错误码
+            // return ret;
+            // 现在遇到解析失败离开循环并在结束地方使用lept_free()释放内存后再返回错误码
+            break;
         }
         memcpy(lept_context_push(c, sizeof(lept_value)), &e, sizeof(lept_value));
         size++;
+        lept_parse_whitespace(c);
         if (*c->json == ',')
         {
             c->json++;
+            lept_parse_whitespace(c);
         }
         else if (*c->json == ']')
         {
@@ -339,6 +351,27 @@ int lept_get_boolean(const lept_value *v)
     return v->type == LEPT_TRUE;
 }
 
+// 这个设计可以避免重复释放
+void lept_free(lept_value *v)
+{
+    size_t i;
+    assert(v != NULL);
+    switch (v->type)
+    {
+        case LEPT_STRING:
+            free(v->u.s.s);
+            break;
+        case LEPT_ARRAY:
+            for (i = 0; i < v->u.a.size; i++)
+                lept_free(&v->u.a.e[i]);
+            free(v->u.a.e);
+            break;
+        default:
+            break;
+    }
+    v->type = LEPT_NULL;
+}
+
 void lept_set_boolean(lept_value *v, int b)
 {
     lept_free(v);
@@ -356,17 +389,6 @@ void lept_set_number(lept_value *v, double n)
     lept_free(v);
     v->u.n = n;
     v->type = LEPT_NUMBER;
-}
-
-// 这个设计可以避免重复释放
-void lept_free(lept_value *v)
-{
-    assert(v != NULL);
-    if (v->type == LEPT_STRING)
-    {
-        free(v->u.s.s);
-    }
-    v->type = LEPT_NULL;
 }
 
 const char* lept_get_string(const lept_value *v)
@@ -406,11 +428,6 @@ size_t lept_get_string_length(const lept_value *v)
 }
 
 
-static void* lept_context_pop(lept_context *c, size_t size)
-{
-    assert(c->top >= size);
-    return c->stack + (c->top -= size);
-}
 
 static int lept_parse_string(lept_context *c, lept_value *v)
 {

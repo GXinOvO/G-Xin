@@ -1,0 +1,3 @@
+/home/bury/JacarandaMimosifolia/project/json/build/CMakeFiles/rebuild_cache.dir
+/home/bury/JacarandaMimosifolia/project/json/build/CMakeFiles/edit_cache.dir
+/home/bury/JacarandaMimosifolia/project/json/build/CMakeFiles/main_cmake.dir

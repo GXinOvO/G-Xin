@@ -1,0 +1,3 @@
+/home/bury/project/AI_gomoku/build/CMakeFiles/rebuild_cache.dir
+/home/bury/project/AI_gomoku/build/CMakeFiles/edit_cache.dir
+/home/bury/project/AI_gomoku/build/CMakeFiles/ai_cmake.dir

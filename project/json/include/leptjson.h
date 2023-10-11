@@ -22,6 +22,8 @@ typedef enum
 */
 // 由于lept_value内使用了自身类型的指针，我们必须前向声明(forward declare)此类型
 typedef struct lept_value lept_value;
+typedef struct lept_member lept_member;
+
 struct lept_value {
 #if 0
     char *s;
@@ -30,6 +32,10 @@ struct lept_value {
 #else
     union {
         // 存储JSON
+        struct {
+            lept_member *m;
+            size_t size;
+        } o;
         struct {
             lept_value *e;
             size_t size;
@@ -44,6 +50,19 @@ struct lept_value {
     lept_type type;
 };
 
+/*
+    lept_member = lept_vlaue + 键
+  如同JSON字符串的值，我们也需要同时保留字符串的长度，因为字符串本身可能
+  包含空字符'\u0000'
+*/
+struct lept_member 
+{
+    char *k;        // member key string
+    size_t klen;    // key string length
+
+    lept_value v;   //member value
+};
+
 enum 
 {
     LEPT_PARSE_OK = 0,
@@ -56,7 +75,10 @@ enum
     LEPT_PARSE_INVALID_STRING_CHAR,
     LEPT_PARSE_INVALID_UNICODE_HEX,
     LEPT_PARSE_INVALID_UNICODE_SURROGATE,
-    LEPT_PARSE_MISS_COMMA_OR_SQUARE_BRACKET
+    LEPT_PARSE_MISS_COMMA_OR_SQUARE_BRACKET,
+    LEPT_PARSE_MISS_KEY,
+    LEPT_PARSE_MISS_COLON,
+    LEPT_PARSE_MISS_COMMA_OR_CURLY_BRACKET
 };
 
 // 解析JSON
@@ -91,4 +113,11 @@ size_t lept_get_string_length(const lept_value *v);
 size_t lept_get_array_size(const lept_value *v);
 lept_value *lept_get_array_element(const lept_value *v, size_t index);
 
+size_t lept_get_object_size(const lept_value *v);
+const char *lept_get_object_key(const lept_value *v, size_t index);
+
+size_t lept_get_object_key_length(const lept_value *v, size_t index);
+lept_value *lept_get_object_value(const lept_value *v, size_t index);
+
+char *lept_stringify(const lept_value *v, size_t *length);
 #endif

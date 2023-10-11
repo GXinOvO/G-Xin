@@ -105,6 +105,15 @@ static int lept_parse_false(lept_context *c, lept_value *v)
 }
 #endif
 
+/*
+  成员的键也是一个JSON字符串，然而，我们不使用lept_value存储键，
+因为这样会浪费了当中type这个无用的字段。由于lept_parse_string()
+是直接地把解析结果写进一个lept_value，所以我们用[提取方法]的重构
+方式，把解析JSON字符串吸入lept_vlaue分拆成两部分
+    解析JSON字符串，把结果写入str和len
+    str指向c->stack中的元素
+*/
+
 // 加入了number后，value的语法变成: value = null / false / true / number 
 static int lept_parse_number(lept_context *c, lept_value *v)
 {
@@ -174,7 +183,7 @@ static int lept_parse_value(lept_context *c, lept_value *v);
 */
 static int lept_parse_array(lept_context *c, lept_value *v)
 {
-    size_t size = 0;
+    size_t i, size = 0;
     int ret;
     EXPECT(c, '[');
     lept_parse_whitespace(c);
@@ -217,9 +226,13 @@ static int lept_parse_array(lept_context *c, lept_value *v)
         }
         else
         {
-            return LEPT_PARSE_MISS_COMMA_OR_SQUARE_BRACKET;
+            ret = LEPT_PARSE_MISS_COMMA_OR_SQUARE_BRACKET;
+            break;
         }
     }
+    for (i = 0; i < size; i++)
+        lept_free((lept_value*)lept_context_pop(c, sizeof(lept_value)));
+    return ret;
 }
 
 // value = null / false // true
@@ -366,6 +379,14 @@ void lept_free(lept_value *v)
                 lept_free(&v->u.a.e[i]);
             free(v->u.a.e);
             break;
+        case LEPT_OBJECT:
+            for (i = 0; i < v->u.o.size; i++)
+            {
+                free(v->u.o.m[i].k);
+                lept_free(&v->u.o.m[i].v);
+            }
+            free(v->u.o.m);
+            break;
         default:
             break;
     }
@@ -427,6 +448,88 @@ size_t lept_get_string_length(const lept_value *v)
     return v->u.s.len;
 }
 
+static int lept_parse_object(lept_context *c, lept_value *v)
+{
+    size_t size;
+    lept_member m;
+    int ret;
+    EXPECT(c, '{');
+    lept_parse_whitespace(c);
+    if (*c->json == '}')
+    {
+        c->json++;
+        v->type = LEPT_OBJECT;
+        v->u.o.m = 0;
+        v->u.o.size = 0;
+        return LEPT_PARSE_OK;
+    }
+    m.k = NULL;
+    size = 0;
+    for (;;)
+    {
+        char *str;
+        lept_init(&m.v);
+
+        /* 1. parse key */
+        if (*c->json != '"')
+        {
+            ret = LEPT_PARSE_MISS_KEY;
+            break;
+        }
+        if ((ret = lept_parse_string_raw(c, &str, &m.klen)) != LEPT_PARSE_OK)
+            break;
+        memcpy(m.k = (char*)malloc(m.klen + 1), str, m.klen);
+        m.k[m.klen] = '\0';
+        /* 2. parse ws colon ws */
+        lept_parse_whitespace(c);
+        if (*c->json != ':')
+        {
+            ret = LEPT_PARSE_MISS_COLON;
+            break;
+        }
+        c->json++;
+        lept_parse_whitespace(c);
+        /* 3. parse value */
+        if ((ret = lept_parse_value(c, &m.v)) != LEPT_PARSE_OK)
+        {
+            break;
+        }
+        memcpy(lept_context_push(c, sizeof(lept_member)), &m, sizeof(lept_member));
+        size++;
+        m.k = NULL;
+        /* 4. parse ws [comma | right-curly-brace] ws */
+        lept_parse_whitespace(c);
+        if (*c->>json == ',')
+        {
+            c->json++;
+            lept_parse_whitespace(c);
+        }
+        else if (*c->json == '}')
+        {
+            size_t s = sizeof(lept_member) * size;
+            c->json++;
+            v->type = LEPT_OBJECT;
+            v->u.o.size = size;
+            memcpy(v->u.o.m = (lept_member*)malloc(s), lept_context_pop(c, s), s);
+            return LEPT_PARSE_OK;
+        }
+        else 
+        {
+            ret = LEPT_PARSE_MISS_COMMA_OR_CURLY_BRACKET;
+            break;
+        }
+    }
+    /* 5. Pop and free members on the stack */
+    free(m.k);
+    for (i = 0; i < size; i++)
+    {
+        lept_member *m = (lept_member *)lept_context_pop(c, sizeof(lept_member));
+        free(m->k);
+        lept_free(&m->v);
+    }
+    v->type = LEPT_NULL;
+    return ret;
+}
 
 
 static int lept_parse_string(lept_context *c, lept_value *v)

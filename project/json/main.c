@@ -322,6 +322,32 @@ static void test_parse_string() {
 }
 
 
+#define TEST_ROUNDTRIP(json) \
+    do {\
+        lept_value v;\
+        char *json2;\
+        size_t length;\
+        lept_init(&v);\
+        EXPECT_EQ_INT(LEPT_PARSE_OK, lept_parse(&v, json));\
+        EXPECT_EQ_INT(LEPT_STRINGIFY_OK, lept_stringify(&v, &json2, &length));\
+        EXPECT_EQ_STRING(json, json2, length);\
+        lept_free(&v);\
+        free(json2);\
+    } while(0)
+
+/*
+    这里我们采用一个简单方式: 把一个JSON解析，然后再生成另一JSON，逐字符比较两个JSON是否
+  一摸一样。这种测试可称为往返(ROUNDTRIP)测试。但需要注意，同一个JSON的内容可以有多种不
+  同的表示方式，例如可以插入不定数量的空白字符，数字'1.0'和'1'也是等价的。
+*/
+static void test_stringify()
+{
+    TEST_ROUNDTRIP("null");
+    TEST_ROUNDTRIP("false");
+    TEST_ROUNDTRIP("true");
+}
+
+
 static void test_parse()
 {
     test_parse_null();

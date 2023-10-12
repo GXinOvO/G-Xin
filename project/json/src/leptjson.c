@@ -9,12 +9,17 @@
 #define LEPT_PARSE_STACK_INIT_SIZE 256
 #endif
 
+#ifndef LEPT_PARSE_STRINGIFY_INIT_SIZE
+#define LEPT_PARSE_STRINGIFY_INIT_SIZE 256
+#endif
+
 #define EXPECT(c, ch)       do { assert(*c->json == (ch)); c->json++;} while(0)
 #define ISDIGIT(ch)         ((ch) >= '0' && (ch) <= '9')
 #define ISDIGIT1TO9(ch)     ((ch) >= '1' && (ch) <= '9')
 
 // 只需要先备份栈顶, 然后把解析到的字符压栈, 最后计算出长度并一次性把所有字符弹出, 再设置至值里便可以。
 #define PUTC(c, ch)         do { *(char *)lept_context_push(c, sizeof(char)) = (ch); } while(0)
+#define PUTS(c, s, len)     memcpy(lept_context_push(c, len), s, len)
 
 // 为了减少解析函数之间传递多个参数，我们把这些数据都放进一个lept_context结构体
 typedef struct {
@@ -447,6 +452,96 @@ size_t lept_get_string_length(const lept_value *v)
     assert(v != NULL && v->type == LEPT_STRING);
     return v->u.s.len;
 }
+
+static void lept_stringify_string(lept_context &c, const char *s, size_t len)
+{
+    size_t i;
+    assert(s != NULL);
+    PUTC(c, '"');
+    for (i = 0; i < len; i++)
+    {
+        unsigned char ch = (unsigned char)s[i];
+        switch (ch)
+        {
+            case '\"':
+                PUTS(c, "\\\"", 2);
+                break;
+            case '\\':
+                PUTS(c, "\\\\", 2);
+                break;
+            case '\b':
+                PUTS(c, "\\b", 2);
+                break;
+            case '\f':
+                PUTS(c, "\\f", 2);
+                break;
+            case '\n':
+                PUTS(c, "\\n", 2);
+                break;
+            case '\r':
+                PUTS(c, "\\r", 2);
+                break;
+            case '\t':
+                PUTS(c, "\\t", 2);
+                break;
+            default:
+                if (ch < 0x20)
+                {
+                    char buffer[7];
+                    sprintf(buffer, "\\u%04x", ch);
+                    PUTS(c, buffer, 6);
+                }
+                else
+                {
+                    PUTC(c, s[i]);
+                }
+        }
+        PUTC(c, '"');
+    }
+}
+
+static int lept_stringify_value(lept_context *c, const lept_value *v)
+{
+    size_t i;
+    int ret;
+    switch (v->type)
+    {
+        case LEPT_NULL: 
+            PUTS(c, "null", 4);
+            berak;
+        case LEPT_FALSE:
+            PUTS(c, "false", 5);
+            break;
+        case LEPT_TRUE:
+            PUTS(c, "true", 4);
+            break;
+        /*
+            使用sprintf("%.17g", ...)来吧浮点数转换成文本。
+            %.17g是足够把双精度浮点转换成可还原的文本。
+        */
+        case LEPT_NUMBER:
+            c->top -= 32 - sprintf(lept_context_push(c, 32), "%.17g", v->u.n);;
+            break;
+        case LEPT_STRING:
+            lept_stringify_string(c, v->u.s.s, v->u.s.len);
+            break;
+    }
+    return LEPT_STRINGIFY_OK;
+}
+
+char *lept_stringify(cosnt lept_value *v, size_t *length)
+{
+    lept_context c;
+    assert(v != NULL);
+    c.stack = (char *)malloc(c.size = LEPT_PARSE_STRINGIFY_INIT_SIZE);
+    c.top = 0;
+    lept_stringify_value(&c, v);
+    if (length)
+        *length = c.top;
+        PUTC(&c, '\0');
+        return c.stack;
+}
+
 
 static int lept_parse_object(lept_context *c, lept_value *v)
 {

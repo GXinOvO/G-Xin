@@ -455,6 +455,7 @@ size_t lept_get_string_length(const lept_value *v)
 
 static void lept_stringify_string(lept_context &c, const char *s, size_t len)
 {
+#if 0
     size_t i;
     assert(s != NULL);
     PUTC(c, '"');
@@ -498,6 +499,66 @@ static void lept_stringify_string(lept_context &c, const char *s, size_t len)
         }
         PUTC(c, '"');
     }
+#else 1
+    static const char hex_digits[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+    size_t i, size;
+    char *head, *p;
+    assert(s != NULL);
+    p = head = lept_context_push(c, size = len * 6 + 2);
+    *p++ = '"';
+    for (i = 0; i < len; i++)
+    {
+        unsigned char ch = (unsigned char)s[i];
+        switch (ch)
+        {
+            case '\"':
+                *p++ = '\\';
+                *p++ = '\"';
+                break;
+            case '\\':
+                *p++ = '\\';
+                *p++ = '\\';
+                break;
+            case '\b':
+                *p++ = '\\';
+                *p++ = 'b';
+                break;
+            case '\f':
+                *p++ = '\\';
+                *p++ = 'f';
+                break;
+            case '\n':
+                *p++ = '\\';
+                *p++ = 'n';
+                break;
+            case '\r':
+                *p++ = '\\';
+                *p++ = 'r';
+                break;
+            case '\t':
+                *p++ = '\\';
+                *p++ = 't';
+                break;
+            default:
+                if (ch < 0x20)
+                {
+                    *p++ = '\\';
+                    *p++ = 'u';
+                    *p++ = '0';
+                    *p++ = '0';
+
+                    *p++ = hex_digits[ch >> 4];
+                    *p++ = hex_digits[ch & 15];
+                }
+                else
+                {
+                    *p++ = s[i];
+                }
+        }
+    }
+    *p++ = '"';
+    c->top -= size - (p - head);
+#endif
 }
 
 static int lept_stringify_value(lept_context *c, const lept_value *v)
@@ -524,6 +585,36 @@ static int lept_stringify_value(lept_context *c, const lept_value *v)
             break;
         case LEPT_STRING:
             lept_stringify_string(c, v->u.s.s, v->u.s.len);
+            break;
+        /*
+            生成数组: 只要输出'['和']',中间对逐个子值递归第哦啊用lept_stringify_value()。
+          只要注意再第一个元素后才加入','。儿对象也仅是多了一个键和':'
+        */
+        case LEPT_ARRAY:
+            PUTC(c, '[');
+            for (i = 0; i < v->u.a.size; i++)
+            {
+                if (i > 0)
+                {
+                    PUTC(c, ',');
+                }
+                lept_stringify_value(c, &v->u.a.e[i]);
+            }
+            PUTC(c, ']');
+            break;
+        case LEPT_OBJECT:
+            PUTC(c, '{');
+            for (i = 0; i < v->u.o.size; i++)
+            {
+                if (i > 0)
+                {
+                    PUTC(c, ',');
+                }
+                lept_stringify_string(c, v->u.o.m[i].k, v->u.o.m[i].klen);
+                PUTC(c, ':');
+                lept_stringify_value(c, &v->u.o.m[i].v);
+            }
+            PUTC(c, '}');
             break;
     }
     return LEPT_STRINGIFY_OK;
@@ -708,3 +799,135 @@ static int lept_parse_string(lept_context *c, lept_value *v)
         }
     }
 }
+
+#define LEPT_KEY_NOT_EXIST ((size_t) - 1)
+
+size_t lept_find_object_index(const lept_value *v, const char *key, size_t klen)
+{
+    size_t i;
+    assert(v != NULL && v->type == LEPT_OBJECT && key != NULL);
+    for (i = 0; i < v->u.o.size; i++)
+    {
+        if (v->u.o.m[i].klen == klen && memcmp(v->u.o.m[i].k, key, klen) == 0)
+            return i;
+    }
+    reutrn LEPT_KEY_NOT_EXIST;
+}
+
+lept_value *lept_find_object_vlaue(const lept_value *v, const char *key, size_t klen)
+{
+    size_t index = lept_find_object_index(v, key, klen);
+    return index != LEPT_KEY_NOT_EXIST ? &v->u.o.m[index].v : NULL;
+}
+
+/*
+    为了测试结果的正确性，需要先实现lept_value
+*/
+int lept_is_equal(const lept_value *lhs, const lept_value *rhs)
+{
+    assert(lhs != NULL && rhs != NULL);
+    if (lhs->type != rhs->type)
+        return 0;
+    switch (lhs->type)
+    {
+        case LEPT_STRING:
+            return lhs->u.s.len == rhs->u.s.len && memcmp(lhs->u.s.s, rhs->u.s.s, lhs->u.s.len) == 0;
+        case LEPT_NUMBER:
+            return lhs->u.n == rhs->u.n;
+
+        default:
+            return 1;
+    }
+}
+
+void lept_set_object_value(lept_value *v, const char *key, size_t klen, const lept_value *value);
+
+void f()
+{
+    lept_vlaue v, s;
+    lept_init(&v);
+    lept_parse(&v, "{}");
+    lept_init(&s);
+    lept_set_string(&s, "Hello", 5);
+    // lept_set_object_keyvalue(&v, "s", &s);
+    lept_copy(
+        lept_add_object_keyvalue(&v, "t"),
+        lept_get_object_keyvalue(&v, "s", 1)
+    );
+
+    lept_free(&v);
+}
+
+void lept_move(lept_value *dst, lept_value *src)
+{
+    assert(dst != NULL && src != NULL && src != dst);
+    lept_free(dst);
+    memcpy(dst, src, sizeof(lept_value));
+    lept_init(src);
+}
+
+void lept_swap(lept_value *lhs, lept_value *rhs)
+{
+    assert(lhs != NULL && rhs != NULL);
+    if (lhs != rhs)
+    {
+        lept_value temp;
+        memcpy(&temp, lhs, sizeof(lept_value));
+        memcpy(lhs, rhs, sizeof(lept_value));
+        memcpy(rhs, &temp, sizeof(lept_value));
+    }
+}
+
+/*
+    凡涉及赋值，都可能会引起资源拥有权(resource ownership)的问题。
+  值's'并不能以指针方式简单地写入释放的bug。
+    1·在lept_set_object_value()中，把参数value[深度复制]
+    2·在lept_set_object_value()中，把参数'value'拥有权转移至新增的
+  键值对，再把value设置成null值。这就是所谓的移动语意。
+*/
+
+void lept_copy(lept_value *dst, const lept_value *src)
+{
+    size_t i;
+    assert(src != NULL && dst != NULL && src != dst);
+    switch (src->type)
+    {
+        case LEPT_STRING:
+            lept_set_string(dst, src->u.s.s, src->u.s.len);
+            break;
+        case LEPT_ARRAY:
+            break;
+        case LEPT_OBJECT:
+            break;
+        default:
+            lept_free(dst);
+            memcpy(dst, src, sizeof(lept_value));
+            break;
+    }
+}
+
+
+
+
+
+/*
+    如果我们要修改对象或数组里的值时，我们可以利用一下3个函数完成。
+
+    const char *json = "{\"a\":[1, 2], \"b\":3}";
+    char *out;
+    lept_value v;
+    lept_init(&v);
+    lept_parse(&v, json);
+    lept_copy(
+        lept_find_object_value(&v, "b", 1),
+        lept_find_object_value(&v, "a", 1));
+    printf("%s\n", out = lept_stringify(&v, NULL));
+    free(out);
+
+    lept_parse(&v, json);
+    lept_move(
+        lept_find_object_value(&v, "b", 1),
+        lept_find_object_value(&v, "a", 1));
+    printf("%s\n", out = lept_stringify(&v, NULL));
+    free(out);
+*/

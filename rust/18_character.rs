@@ -72,15 +72,16 @@ fn output_two<T: Descriptive>(arg1: T, arg2: T)
 /*
     特性作类型表示时如果涉及多个特性，可以用 + 符号表示，例如:
 */
-fn notify (item: impl Summary + Display)
-fn notify<T: Summary + Display>(item: T)
+// fn notify (item: impl Summary + Display)
+// fn notify<T: Summary + Display>(item: T)
 
 /*
     --TODO: 
         仅用于表示类型的时候，并不意味着可以在impl块中使用。
         复杂的实现关系可以使用where关键字简化。
+
+    fn some_function<T: Display + Clone, U: Clone + Debug>(t: T, u: U)
 */
-fn some_function<T: Display + Clone, U: Clone + Debug>(t: T, u: U)
 
 /*  可以简化成:
 fn some_function_2<T, U>(t: T, u: U) -> i32
@@ -89,7 +90,10 @@ fn some_function_2<T, U>(t: T, u: U) -> i32
 
 */
 
-
+/*
+    Tip: 
+        由于需要声明compare函数的第二参数必须与实现该特性的类型相同，所以Self(注意大小写)关键字就代表了当前类型(不是实例)本身
+*/
 trait Comparable
 {
     fn compare(&self, object: &Self) -> i8;
@@ -109,15 +113,40 @@ fn max<T: Comparable>(array: &[T]) -> &T
     &array[max_index]
 }
 
-
 impl Comparable for f64 {
-    fn compare(&self, object &f64) -> i8 
+    fn compare(&self, object: &f64) -> i8 
     {
         if &self > &object { 1 }
         else if &self == &object { 0 }
         else { -1 }
     }
 }
+
+/*
+    --TODO: 特性做返回值:
+        特性做返回值只接受实现了该特性的对象做返回值且在同一个函数中所有可能的返回值类型必须完全一样，比如结构体A与结构体B都实现了特性Trait。
+*/
+fn person() -> impl Descriptive
+{
+    Person {
+        name: String::from("Cali"),
+        age: 24
+    }
+}
+
+/*
+    --TODO: 有条件啊实现方法:
+        impl功能十分强大，我们就可以用它实现类的方法。但对于泛型来说，有时我们需要区分一下它所属的泛型已经实现的方法来决定它接下来该实现的方法:
+
+    struct A<T> {}
+
+    impl<T: B + C> A<T> {
+        fn d(&self) {}
+    }
+
+    这段代码声明了A<T>类型必须在T已经实现B和C特性的前提下才能有效实现此impl块。
+*/
+
 fn main ()
 {
     let cali = Person {

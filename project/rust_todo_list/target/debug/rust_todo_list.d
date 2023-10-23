@@ -1,0 +1,1 @@
+/home/bury/JacarandaMimosifolia/project/rust_todo_list/target/debug/rust_todo_list: /home/bury/JacarandaMimosifolia/project/rust_todo_list/src/database.rs /home/bury/JacarandaMimosifolia/project/rust_todo_list/src/main.rs

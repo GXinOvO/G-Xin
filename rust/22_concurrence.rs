@@ -23,6 +23,8 @@
 
         Rust中通过std::thread::spawn函数创建新线程
 */
+
+/* 
 use std::thread;
 use std::time::Duration;
 
@@ -37,6 +39,8 @@ fn spawn_function()
 
 fn main()
 {
+  // std::thread::spawn函数的参数是一个无参函数，但这个写法并不是推荐的写法，我们可以
+  使用闭包来传递函数作为参数:
   thread::spawn(spawn_function);
 
   for i in 0..3
@@ -44,4 +48,99 @@ fn main()
     println!("main thread print {}", i);
     thread::sleep(Duration::from_millis(1));
   }
+}
+*/
+
+use std::thread;
+use std::time::Duration;
+use std::sync::mpsc;
+
+fn main()
+{
+  /*
+    --TODO:
+      闭包是可以保存进变量或作为参数传递给其他函数的匿名函数。闭包相当于Rust中的
+    Lambda表达式，格式:
+    | 参数1, 参数2, ... | -> 返回值类型 {
+      // 函数体
+    }
+   */
+  thread::spawn(|| {
+    for i in 0..5 {
+      println!("spawned thread print {}", i);
+      thread::sleep(Duration::from_millis(1));
+    }
+  });
+
+  for i in 0..3 {
+    println!("main thread print {}", i);
+    thread::sleep(Duration::from_millis(1));
+  }
+
+  let inc = |num: i32| -> i32 {
+    num + 1
+  };
+  println!("inc(5) = {}", inc(5));
+
+  /*
+    --TODO:
+      闭包可以省略类型声明使用Rust自动类型判断机制
+   */
+  let inc1 = |num| {
+    num + 1
+  };
+  println!("inc1(5) = {}", inc1(5));
+
+  /*
+    --TODO: join方法
+      join方法可以使子线程运行结束后再停止运行程序
+   */
+  let handle = thread::spawn(|| {
+    for i in 0..5 {
+      println!("handle spawned thread print {}", i);
+      thread::sleep(Duration::from_millis(1));
+    }
+  });
+
+  for i in 0..3 {
+    println!("handle main thread print {}", i);
+    thread::sleep(Duration::from_millis(1));
+  }
+  handle.join().unwrap();
+
+  /*
+    --TODO: move强制所有权转移
+      下面代码在子线程中尝试使用当前函数的资源，这一定是错误的！因为所有权机制
+    禁止这种危险情况的产生，他将破坏所有权机制销毁资源的一定性。我们可以使用闭
+    包的move关键字来处理:
+   */
+  let s = "hello";
+  
+  /* 
+    error:
+  let hand = thread::spawn(|| {
+    println!("{}", s);
+  });
+  */
+  let hand = thread::spawn(move || {
+    println!("{}", s);
+  });
+  hand.join().unwrap();
+
+
+  /*
+    --TODO: 消息传递
+      Rust中一个实现消息传递并发的主要工具是通道(channel)，通道有两部分组成，一个发
+    送者(transmitter)和一个接收者(reveiver)
+      std::sync::mpsc包含了消息传递的方法
+   */
+  let (tx, rx) = mpsc::channel();
+
+  thread::spawn(move || {
+    let val = String::from("hi");
+    tx.send(val).unwrap();
+  });
+  let received = rx.recv().unwrap();
+  println!("Got: {}", received);
+
 }

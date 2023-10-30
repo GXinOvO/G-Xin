@@ -2,6 +2,8 @@
 
 mod cli;
 mod database;
+mod commands;
+mod utils;
 
 use clap::Parser;
 use cli::{Cli, Commands};
@@ -11,45 +13,21 @@ fn main()
 {
     let args = Cli::parse();
 
-    let mut db = Database::open(".rodorc");
+    let mut db = Database::open();
 
-    match args.command 
+    // -> 匹配命令调用
+    let result = match args.command
     {
-        Commands::Info => {
-            println!("Rodo is a simple todo list manager.");
-        }
-        Commands::Add { content } => {
-            if let Some(content) = content 
-            {
-                println!("Adding a todo item: {}", content);
-                let id = db.read_records().last().map(|r| r.id + 1).unwrap_or(1);
-                db.add_record(&database::Record{ id, content });
-            }
-            else 
-            {
-                println!("You need to specify the content of the todo item.")
-            }
-        }
-        Commands::Remove { id } => {
-            if id.is_none()
-            {
-                println!("You need to specify the id of the todo item.");
-                return ;
-            }
-            println!("Removing a todo item: {}", id.clone().unwrap());
-            db.remove_record(id.unwrap().parse::<i32>().unwrap());
-        }
-        Commands::List => {
-            let records = db.read_records();
-            if records.is_empty()
-            {
-                println!("No records. You can add one with `rodo add [content]`");
-                return ;
-            }
-            for record in records
-            {
-                println!(" ⬜️ {}: {}", record.id, record.content);
-            }
-        }
+        Commands::Info => commands::info(),
+        Commands::Add { content } => commands::add(&mut db, content),
+        Commands::Remove { id } => commands::remove(&mut db, id),
+        Commands::List => commands::list(&mut db),
+    };
+
+    // -> 统一处理错误
+    if let Err(err) = result 
+    {
+        eprintln!("\x1b[31merror:\x1b[39m {}", err);
+        std::process::exit(1);
     }
 }

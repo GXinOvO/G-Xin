@@ -4,6 +4,8 @@
         · Open Options: 结构体，用于配置文件的打开选项
 */
 
+use crate::utils::{check_db_file, get_db_file_path};
+use std::fs;
 use std::fs::{File, OpenOptions};
 use std::io::{BufRead, BufReader, Seek, Write};
 
@@ -46,24 +48,30 @@ pub fn parse_record_line(line: &str) -> Record
 // -> 为Database 实现一个open方法，参数接收一个文件名，返回一个Database实例
 impl Database 
 {
-    // 打开数据库文件
-    pub fn open(filename: &str) -> Database
-    {
-        let file = OpenOptions::new()
-                    .create(true)
-                    .read(true)
-                    .write(true)
-                    .open(filename)
-                    .unwrap();
-        Database { file }
 
+    // -> 修改一下open方法
+    pub fn open() -> Database
+    {
+        // -> 先检查db文件是否存在，不存在就创建
+        check_db_file().unwrap();
+
+        // -> 获取db文件路径
+        let db_file = get_db_file_path();
+
+        let file = OpenOptions::new()
+            .create(true)
+            .read(true)
+            .write(true)
+            .open(db_file)
+            .unwrap();
+        Database { file }
     }
 
     pub fn add_record(&mut self, record: &Record) -> Result<(), std::io::Error>
     {
         let line = format!("{}, {}\n", record.id, record.content);
-        writeln!(self.file, "{}", line).unwrap();
-        println!(" Item added: {}", record.content);
+        writeln!(self.file, "{}", line)
+        // println!(" Item added: {}", record.content);
     }
 
     // -> 删除记录
@@ -89,7 +97,9 @@ impl Database
             Some((i, _)) =>
             {
                 // 读取源文件内容
-                let contents = std::fs::read_to_string(".rodorc").unwrap();
+                // let contents = std::fs::read_to_string(".rodorc").unwrap();
+                let db_file = get_db_file_path();
+                let contents = fs::read_to_string(db_file).unwrap();
 
                 /*  
                     过滤掉对应的行，这里使用的对应API可以查看Rust标准库

@@ -102,4 +102,12 @@ fn main()
     // -> 模块机制消除了相同名字的项之间的歧义
     function();
     my_mod::function();
+
+    // -> 公有项，包括嵌套模块内的，都可以在父模块外部访问
+    my_mod::indirect_access();
+    my_mod::nested::function();
+    my_mod::call_public_function_in_my_mod();
+
+    // -> pub(crate) 项可以在同一个crate中的任何地方访问
+    my_mod::public_function_in_crate();
 }

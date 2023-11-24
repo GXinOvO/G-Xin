@@ -21,25 +21,40 @@ fn main() {
      */
     let secret_number = rand::thread_rng().gen_range(1..=100);
 
-    println!("Please input your guess.");
-
-    let mut guess = String::new();
-
-    io::stdin()
-        .read_line(&mut guess)
-        .expect("Failed to read line");
-    
-    println!("You guessed: {guess}");
-
     let x = 5;
     let y = 10;
-
     println!("x = {x} and y + 2 = {}", y + 2);
 
-    match guess.cmp(&secret_number)
-    {
-        Ordering::Less => println!("Too small!"),
-        Ordering::Greater => println!("Too big!"),
-        Ordering::Equal => println!("You win!"),
+    println!("The secret number is : {secret_number}");
+
+    loop {
+
+        println!("Please input your guess.");
+
+        let mut guess = String::new();
+    
+        io::stdin()
+            .read_line(&mut guess)
+            .expect("Failed to read line");
+        
+        // -> trim方法会去除字符串开头和结尾的空白字符，我们必须执行此方法才能将字符串与u32比较。
+        // -> parse方法将字符串转换为其他类型。这里通过let guess: u32指定
+        // -> expect转换为match，将遇到错误就崩溃转换为处理错误。
+        let guess: u32 = match guess.trim().parse() {
+            Ok(num) => num,
+            Err(_) => continue,
+        };
+    
+        println!("You guessed: {guess}");
+        
+        match guess.cmp(&secret_number)
+        {
+            Ordering::Less => println!("Too small!"),
+            Ordering::Greater => println!("Too big!"),
+            Ordering::Equal => {
+                println!("You win!");
+                break;
+            }
+        }
     }
 }

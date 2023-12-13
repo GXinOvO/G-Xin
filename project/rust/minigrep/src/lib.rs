@@ -1,10 +1,13 @@
 use std::error::Error;
+use std::env;
 use std::fs;
 
 pub struct Config
 {
     pub query: String,
     pub file_path: String,
+    // -> 判断是否启动大小写敏感
+    pub ignore_case: bool,
 }
 
 
@@ -33,7 +36,13 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>>
     // -> ?运算符用于处理可能得错误，如果在读取文件时发生错误，它会立即返回错误并当前函数的执行
     let contents = fs::read_to_string(config.file_path)?;
 
-    for line in search(&config.query, &contents)
+    let results = if config.ignore_case 
+    {
+        search_case_insensitive(&config.query, &contents)
+    } else {
+        search(&config.query, &contents)
+    };
+    for line in results
     {
         println!("{line}");
     }
@@ -82,23 +91,59 @@ impl Config
         panic对于使用用户并不是一个友好的信息，它更适合开发者。
         所以，我们可以返回一个Result。
     但有一点需要额外注意下，从代码惯例的角度出发，new往往不会失败，毕竟新建一个实例没道理失败，因此修改为build更合适
-
     */
+    /* 
     pub fn build(args: &[String]) -> Result<Config, &'static str> 
     {
+    --TODO:
+        为了迎合调用函数的修改， 这里也需要改动
+    */
+    pub fn build(
+        mut args: impl Iterator<Item = String>,
+    ) -> Result<Config, &'static str>
+    {
+        /* 
         if args.len() < 3
         {
             return Err("nor enough arguments");
         }
         let query = args[1].clone();
         let file_path = args[2].clone();
+        
+        --TODO: 
+            数组索引会越界，为了安全性和简洁性，使用Iterator特征自带的next方法是一个更好的选择
+            
+            第一个参数是程序名，由于无需使用，因此这里直接空调用一次
+        */
+        args.next();
 
-        Ok(Config { query, file_path })
+        let query = match args.next()
+        {
+            Some(arg) => arg,
+            None => return Err("Didn't get a query string"),
+        };
+
+        let file_path = match args.next()
+        {
+            Some(arg) => arg,
+            None => return Err("Didn't get a file path"),
+        };
+
+        // -> env::var用于获取名为IGNORE_CASE的环境变量的值。is_ok()用于检查是否成功获取到环境变量的值
+        //env::var返回的是一个Result类型的值。
+        let ignore_case = env::var("IGNORE_CASE").is_ok();
+
+        Ok(Config { 
+            query, 
+            file_path,
+            ignore_case,
+        })
     }
 }
 
 pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> 
 {
+    /* 
     let mut results = Vec::new();
     // -> 一个字符串切片的方法，用于按行迭代字符串内容。
     for line in contents.lines()
@@ -107,6 +152,32 @@ pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str>
         if line.contains(query) 
         {
             results.push(line);    
+        }
+    }
+    results
+    
+    --TODO:
+        我们需要让我们的代码更rust
+    */
+    contents
+        .lines()
+        .filter(|line| line.contains(query))
+        .collect()
+}
+
+pub fn search_case_insensitive<'a> (
+    query: &str,
+    contents: &'a str,
+) -> Vec<&'a str>
+{
+    let query = query.to_lowercase();
+    let mut results = Vec::new();
+
+    for line in contents.lines()
+    {
+        if line.to_lowercase().contains(&query)
+        {
+            results.push(line);
         }
     }
     results
@@ -127,5 +198,16 @@ safe, fast, productive.
 Pick three.";
 
         assert_eq!(vec!["safe, fast, productive."], search(query, contents));
+    }
+
+    #[test]
+    fn case_insensitive()
+    {
+        let query = "rUsT";
+        let contents = "\
+Rust:
+safe, fast, productive.
+Trust me.";
+        assert_eq!(vec!["Rust:", "Trust me."], search_case_insensitive(query, contents));
     }
 }

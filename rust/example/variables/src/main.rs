@@ -16,6 +16,13 @@ fn main() {
     makes_copy(x);
 
     println!("x: {}", x);
+
+    let a = String::from("Hello World!");
+
+    let word_index = first_world(&a);
+
+    println!("{}", word_index);
+
 }
 
 fn take_ownership(some_string: String)
@@ -26,4 +33,18 @@ fn take_ownership(some_string: String)
 fn makes_copy(some_number: i32)
 {
     println!("{}", some_number)
+}
+
+
+fn first_world(s: &String) -> usize
+{
+    let bytes = s.as_bytes();
+
+    for (i, &item) in bytes.iter().enumerate()
+    {
+        if item == b' ' {
+            return i;
+        }
+    }
+    s.len()
 }

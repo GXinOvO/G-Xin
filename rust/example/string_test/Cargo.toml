@@ -1,3 +1,4 @@
+workspace = { members = ["hashmap_test"] }
 [package]
 name = "string_test"
 version = "0.1.0"

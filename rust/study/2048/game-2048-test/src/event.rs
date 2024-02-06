@@ -82,4 +82,9 @@ impl Events
             tick_handle,
         }
     }
+
+    pub fn next(&self) -> Result<Event<Key>, mpsc::RecvError>
+    {
+        self.rx.recv()
+    }
 }

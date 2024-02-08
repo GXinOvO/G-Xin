@@ -35,8 +35,14 @@ use tui::{
         Block,
         Borders,
     },
-    style::{Color, Style},
-    text::Spans,
+    style::{
+        Color, 
+        Style
+    },
+    text::{
+        Span,
+        Spans,
+    }
 };
 
 use crossterm::{
@@ -127,8 +133,9 @@ fn main() -> Result<(), Box<dyn Error>>
                             ctx.print(
                                 ((col + 1) as f64) * app.box_size - half_box_size - font_width,
                                 ((4 - row) as f64) * app.box_size - half_box_size - font_width * 2.0,
-                                Spans::from(Box::leak(s).to_string()),
-                                // score_to_color(score),
+                                Spans::from(
+                                    Span::styled(Box::leak(s).to_string(), Style::default().fg(score_to_color(score)))
+                                ),
                             );
                             ctx.draw(&Line {
                                 x1: x_box,
@@ -170,15 +177,17 @@ fn main() -> Result<(), Box<dyn Error>>
                         ctx.print(
                             app.box_size * 1.5,
                             app.box_size * 2.0,
-                            " GAME OVER! ",
-                            // Color::Blue,
+                            Spans::from(
+                                Span::styled(" GAME OVER! ", Style::default().fg(Color::Blue))
+                            ),
                         );
 
                         ctx.print(
                             app.box_size * 1.3,
                             app.box_size * 1.8,
-                            " Restart[R] Quit[Q] ",
-                            // Color::Blue,
+                            Spans::from(
+                                Span::styled(" Restart[R] Quit[Q] ", Style::default().fg(Color::Blue))
+                            ),
                         );
                     }
                 })
@@ -193,15 +202,19 @@ fn main() -> Result<(), Box<dyn Error>>
                     ctx.print(
                         board_size, 
                         board_size, 
-                        Spans::styled("> Relax <", Style::default().fg(Color::Blue))
+                        Spans::from(
+                            Span::styled("> Relax <", Style::default().fg(Color::Blue))
+                        ),
                     );
 
                     let score = app.get_score().to_owned().to_string().into_boxed_str();
-                    ctx.print(board_size, board_size - 20.0, "Score: ");
+                    ctx.print(board_size, board_size - 15.0, "Score: ");
                     ctx.print(
-                        board_size,
-                        board_size - 40.0,
-                        Spans::from(Box::leak(score).to_string()),
+                        board_size + 10.0,
+                        board_size - 20.0,
+                        Spans::from(
+                            Span::styled(Box::leak(score).to_string(), Style::default().fg(Color::Green))
+                        ),
                     );
                     ctx.print(board_size, 0.0, "Quit[Q]");
                 })

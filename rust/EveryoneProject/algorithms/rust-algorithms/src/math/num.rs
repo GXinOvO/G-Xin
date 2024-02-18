@@ -15,6 +15,16 @@ pub fn fast_gcd(mut a: i64, mut b: i64) -> i64 {
 
 /// Represents a fraction reduced to lowest terms
 #[derive(Clone, Copy, Eq, PartialEq, Debug, Hash)]
+/*
+--Clone Copy
+    所有实现了Copy的类型都必须实现Clone
+        当你显式调用Clone方法时，Rust会假定你知道自己在做什么，并且希望按位复制该值。
+    并不是所有类型都可以实现Copy：
+        · 类型本身是POD(Plain Oid Data)类型，即不包含任何指针或引用
+        · 类型的所有字段都实现了Copy
+    当一个类型实现了Copy时，他的值可以可以在赋值、传参和返回值时自动赋值。
+    由于Copy类型的值总是按位复制，所以他们的复制开销很小。
+*/
 pub struct Rational {
     pub num: i64,
     pub den: i64,

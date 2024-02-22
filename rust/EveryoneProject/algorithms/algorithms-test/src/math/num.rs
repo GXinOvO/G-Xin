@@ -167,6 +167,12 @@ impl Complex
             imag,
         }
     }
+    pub fn from_polar(
+        r: f64,
+        th: f64,
+    ) -> Self {
+        Self::new(r * th.cos(), r * th.sin())
+    }
     pub fn abs_square(
         self
     ) -> f64 {
@@ -378,7 +384,7 @@ impl Matrix
         vec: &[f64],
         as_row: bool
     ) -> Self {
-        let cols = if as_row { vec.len( ) } else { 1 };
+        let cols = if as_row { vec.len() } else { 1 };
         let inner = vec.to_vec().into_boxed_slice();
         Self { cols, inner }
     }
@@ -386,6 +392,19 @@ impl Matrix
         &self
     ) -> usize {
         self.inner.len() / self.cols
+    }
+    pub fn transpose(
+        &self
+    ) -> Self {
+        let mut matrix = Matrix::zero(self.cols, self.rows());
+        for i in 0..self.rows() 
+        {
+            for j in 0..self.cols 
+            {
+                matrix[j][i] = self[i][j]
+            }
+        }
+        matrix
     }
 }
 impl Index<usize> for Matrix 
@@ -407,5 +426,96 @@ impl IndexMut<usize> for Matrix
     ) -> &mut Self::Output {
         let start = self.cols * row;
         &mut self.inner[start..start + self.cols]
+    }
+}
+impl Neg for *Matrix 
+{
+    type Output = Matrix;
+    fn neg(
+        self
+    ) -> Matrix {
+        let inner = self.inner
+                        .iter()
+                        .map( |&v| -v)
+                        .collect();
+        Matrix {
+            cols: self.cols,
+            inner,
+        }
+    }
+}
+impl Add for &Matrix 
+{
+    type Output = Matrix;
+    fn add(
+        self,
+        other: Self
+    ) -> Matrix {
+        let self_iter = self.inner.iter();
+        let inner = self_iter
+                    .zip(other.inner.iter())
+                    .map( |(&u, &v) u + v)
+                    .collect();
+        Matrix {
+            cols: self.cols,
+            inner,
+        }
+    }
+}
+impl Sub for &Matrix 
+{
+    type Output = Matrix;
+    fn sub(
+        self,
+        other: Self
+    ) -> Matrix {
+        let self_iter = self.inner.iter();
+        let inner = self_iter
+                    .zip(other.inner.iter())
+                    .map( |(&u, &v)| u - v)
+                    .collect();
+        Matrix {
+            cols: self.cols,
+            inner,
+        }
+    }
+}
+impl Mul<f64> for &Matrix
+{
+    type Output = Matrix;
+    fn mul(
+        self,
+        scalar: f64
+    ) -> Matrix {
+        let inner = self.inner
+                        .iter()
+                        .map( |&v| v * scalar)
+                        .collect();
+        Matrix {
+            cols: self.cols,
+            inner,
+        }
+    }
+}
+impl Mul for &Matrix 
+{
+    type Output = Matrix;
+    fn mul(
+        self,
+        other: Self
+    ) -> Matrix {
+        assert_eq!(self.cols, other.rows());
+        let mut matrix = Matrix::zero(self.rows(), other.cols);
+        for i in 0..self.rows()
+        {
+            for k in 0..self.cols 
+            {
+                for j in 0..other.cols 
+                {
+                    matrix[i][j] += self[i][k] * other[k][j];
+                }
+            }
+        }
+        matrix
     }
 }

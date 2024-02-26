@@ -1,7 +1,0 @@
----
-rust:
-  url: https://www.rust-lang.org/
-post:
-  url: https://jsonplaceholder.typicode.com/comments
-  params:
-    postId: 1

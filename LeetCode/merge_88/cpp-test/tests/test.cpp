@@ -46,7 +46,7 @@ main(
     int argc, 
     char **argv
 ) {
-    printf("Running main() from %s\n", __FILE__);
+    std::cout <<"Running main() from " << __FILE__ << std::endl;
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }

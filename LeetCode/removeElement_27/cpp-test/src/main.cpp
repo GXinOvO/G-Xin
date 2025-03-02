@@ -6,9 +6,14 @@ removeElement(
     std::vector<int>& nums,
     int val
 ) {
-    int count = 0;
-    for (int i = 0; i < nums.size(); i++) {
-        if (nums[i] != val) count++;
+    int left = 0, right = nums.size();
+    while (left < right) {
+        if (nums[left] == val) {
+            nums[left] = nums[right - 1];
+            right--;
+        } else {
+            left++;
+        }
     }
-    return count;
+    return left;
 }

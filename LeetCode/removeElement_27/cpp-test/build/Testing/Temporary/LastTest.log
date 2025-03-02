@@ -1,0 +1,45 @@
+Start testing: Mar 02 18:23 CST
+----------------------------------------------------------
+1/1 Testing: TestRemoveElement
+1/1 Test: TestRemoveElement
+Command: "/Users/jacaranda-mimosifolia/JacarandaMimosifolia/LeetCode/removeElement_27/cpp-test/build/test_remove_element"
+Directory: /Users/jacaranda-mimosifolia/JacarandaMimosifolia/LeetCode/removeElement_27/cpp-test/build
+"TestRemoveElement" start time: Mar 02 18:23 CST
+Output:
+----------------------------------------------------------
+Running main() from /Users/jacaranda-mimosifolia/JacarandaMimosifolia/LeetCode/removeElement_27/cpp-test/tests/test.cpp
+[==========] Running 2 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 2 tests from TestRemoveElement
+[ RUN      ] TestRemoveElement.CheckTest1
+[       OK ] TestRemoveElement.CheckTest1 (0 ms)
+[ RUN      ] TestRemoveElement.CheckTest2
+[       OK ] TestRemoveElement.CheckTest2 (0 ms)
+[----------] 2 tests from TestRemoveElement (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 2 tests from 1 test suite ran. (0 ms total)
+[  PASSED  ] 2 tests.
+2025-03-02T18:23:02+08:00
+Running /Users/jacaranda-mimosifolia/JacarandaMimosifolia/LeetCode/removeElement_27/cpp-test/build/test_remove_element
+Run on (4 X 3100 MHz CPU s)
+CPU Caches:
+  L1 Data 32 KiB (x2)
+  L1 Instruction 32 KiB (x2)
+  L2 Unified 256 KiB (x2)
+  L3 Unified 4096 KiB (x1)
+Load Average: 4.65, 6.35, 6.81
+-----------------------------------------------------------------
+Benchmark                       Time             CPU   Iterations
+-----------------------------------------------------------------
+BM_RemoveElement_Test1       31.2 ns         30.2 ns     21488014
+BM_RemoveElement_Test2       44.5 ns         42.8 ns     16215265
+<end of output>
+Test time =   3.03 sec
+----------------------------------------------------------
+Test Passed.
+"TestRemoveElement" end time: Mar 02 18:23 CST
+"TestRemoveElement" time elapsed: 00:00:03
+----------------------------------------------------------
+
+End testing: Mar 02 18:23 CST

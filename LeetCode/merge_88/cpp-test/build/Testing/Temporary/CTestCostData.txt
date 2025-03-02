@@ -1,2 +1,2 @@
-TestMerge 4 0.00067114
+TestMerge 1 1.17158
 ---

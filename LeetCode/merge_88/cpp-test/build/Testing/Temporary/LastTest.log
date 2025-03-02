@@ -1,13 +1,13 @@
-Start testing: Feb 21 07:33 UTC
+Start testing: Mar 02 17:24 CST
 ----------------------------------------------------------
 1/1 Testing: TestMerge
 1/1 Test: TestMerge
-Command: "/workspace/JacarandaMimosifolia/LeetCode/merge_88/cpp-test/build/test_merge"
-Directory: /workspace/JacarandaMimosifolia/LeetCode/merge_88/cpp-test/build
-"TestMerge" start time: Feb 21 07:33 UTC
+Command: "/Users/jacaranda-mimosifolia/JacarandaMimosifolia/LeetCode/merge_88/cpp-test/build/test_merge"
+Directory: /Users/jacaranda-mimosifolia/JacarandaMimosifolia/LeetCode/merge_88/cpp-test/build
+"TestMerge" start time: Mar 02 17:24 CST
 Output:
 ----------------------------------------------------------
-Running main() from /workspace/JacarandaMimosifolia/LeetCode/merge_88/cpp-test/tests/test.cpp
+Running main() from /Users/jacaranda-mimosifolia/JacarandaMimosifolia/LeetCode/merge_88/cpp-test/tests/test.cpp
 [==========] Running 3 tests from 1 test suite.
 [----------] Global test environment set-up.
 [----------] 3 tests from TestMerge
@@ -23,11 +23,11 @@ Running main() from /workspace/JacarandaMimosifolia/LeetCode/merge_88/cpp-test/t
 [==========] 3 tests from 1 test suite ran. (0 ms total)
 [  PASSED  ] 3 tests.
 <end of output>
-Test time =   0.00 sec
+Test time =   1.17 sec
 ----------------------------------------------------------
 Test Passed.
-"TestMerge" end time: Feb 21 07:33 UTC
-"TestMerge" time elapsed: 00:00:00
+"TestMerge" end time: Mar 02 17:24 CST
+"TestMerge" time elapsed: 00:00:01
 ----------------------------------------------------------
 
-End testing: Feb 21 07:33 UTC
+End testing: Mar 02 17:24 CST

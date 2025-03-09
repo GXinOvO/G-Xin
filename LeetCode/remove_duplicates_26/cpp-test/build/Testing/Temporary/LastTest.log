@@ -1,0 +1,31 @@
+Start testing: Mar 09 15:50 CST
+----------------------------------------------------------
+1/1 Testing: TestRemoveDuplicates
+1/1 Test: TestRemoveDuplicates
+Command: "/Users/jacaranda-mimosifolia/JacarandaMimosifolia/LeetCode/remove_duplicates_26/cpp-test/build/test_removeduplicates"
+Directory: /Users/jacaranda-mimosifolia/JacarandaMimosifolia/LeetCode/remove_duplicates_26/cpp-test/build
+"TestRemoveDuplicates" start time: Mar 09 15:50 CST
+Output:
+----------------------------------------------------------
+Running main() from /Users/jacaranda-mimosifolia/JacarandaMimosifolia/LeetCode/remove_duplicates_26/cpp-test/tests/test.cpp
+[==========] Running 2 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 2 tests from TestRemoveDuplicates
+[ RUN      ] TestRemoveDuplicates.CheckTest1
+[       OK ] TestRemoveDuplicates.CheckTest1 (0 ms)
+[ RUN      ] TestRemoveDuplicates.CheckTest2
+[       OK ] TestRemoveDuplicates.CheckTest2 (0 ms)
+[----------] 2 tests from TestRemoveDuplicates (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 2 tests from 1 test suite ran. (0 ms total)
+[  PASSED  ] 2 tests.
+<end of output>
+Test time =   0.05 sec
+----------------------------------------------------------
+Test Passed.
+"TestRemoveDuplicates" end time: Mar 09 15:50 CST
+"TestRemoveDuplicates" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Mar 09 15:50 CST
